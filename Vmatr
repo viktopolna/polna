@@ -1,0 +1,17 @@
+SELECT
+  day,
+  daily_treasury_fee,
+  daily_referrer_fee,
+  SUM(daily_treasury_fee) OVER (ORDER BY day) AS cumulative_treasury_rev,
+  SUM(daily_referrer_fee) OVER (ORDER BY DAY) AS cumulative_referrer_fee
+FROM (
+  SELECT
+    DATE_TRUNC('day', FROM_ISO8601_TIMESTAMP(mint_time)) AS day,
+    SUM(treasury_fee / 1e18) AS daily_treasury_fee,
+    SUM(referrer_fee / 1e18) AS daily_referrer_fee
+  FROM dune.rabbithole.dataset_boost_profile_summary
+  GROUP BY
+    DATE_TRUNC('day', FROM_ISO8601_TIMESTAMP(mint_time))
+) AS subquery
+ORDER BY
+  day DESC
